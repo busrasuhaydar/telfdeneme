@@ -249,7 +249,7 @@
             const layerConfigs = [
                 {
                     name: 'EXTREME_CLOSE',
-                    count: isPhone ? 60 : (isTablet ? 120 : 180),  // 📱 80→60 (optimize!)
+                    count: isPhone ? 30 : (isTablet ? 100 : 180),  // 📱 60→30 (YARISI!)
                     minDist: 2,      // Kameraya 2-8 birim mesafe (ÇOK YAKIN!)
                     maxDist: 8,
                     minLength: 2.5,  // Çok uzun damlalar
@@ -260,7 +260,7 @@
                 },
                 {
                     name: 'CLOSE',
-                    count: isPhone ? 120 : (isTablet ? 250 : 400),  // 📱 150→120 (optimize!)
+                    count: isPhone ? 60 : (isTablet ? 200 : 400),  // 📱 120→60 (YARISI!)
                     minDist: 8,      // 8-25 birim
                     maxDist: 25,
                     minLength: 1.5,
@@ -271,7 +271,7 @@
                 },
                 {
                     name: 'MEDIUM',
-                    count: isPhone ? 150 : (isTablet ? 350 : 600),  // 📱 200→150 (optimize!)
+                    count: isPhone ? 75 : (isTablet ? 300 : 600),  // 📱 150→75 (YARISI!)
                     minDist: 25,     // 25-80 birim
                     maxDist: 80,
                     minLength: 1.0,
@@ -282,7 +282,7 @@
                 },
                 {
                     name: 'FAR',
-                    count: isPhone ? 100 : (isTablet ? 250 : 400),  // 📱 150→100 (optimize!)
+                    count: isPhone ? 50 : (isTablet ? 200 : 400),  // 📱 100→50 (YARISI!)
                     minDist: 80,     // 80-150 birim (uzak)
                     maxDist: 150,
                     minLength: 0.5,
@@ -420,23 +420,25 @@
         }
         // ============ 🌧️ KATMANLI YAĞMUR SİSTEMİ SONU ============
         
-        // 📱 PROFESYONEL MOBİL RENDERER - ULTRA OPTİMİZE!
+        // 📱 EXTREME MOBİL RENDERER - ÇÖKME İMKANSIZ!
         const renderer = new THREE.WebGLRenderer({ 
-            antialias: isTablet,  // 📱 Tablet'te antialias AÇIK!
-            powerPreference: "high-performance",
-            precision: isTablet ? "highp" : (isMobile ? "mediump" : "highp"),
+            antialias: false,  // 📱 TELEFONDA ANTIALIAS KAPALI!
+            powerPreference: isPhone ? "low-power" : "high-performance",  // 📱 Düşük güç modu!
+            precision: isPhone ? "lowp" : (isTablet ? "mediump" : "highp"),  // 📱 En düşük kalite!
             stencil: false,
             depth: true,
             alpha: false,
-            logarithmicDepthBuffer: false
+            logarithmicDepthBuffer: false,
+            preserveDrawingBuffer: false,  // 📱 Memory save!
+            failIfMajorPerformanceCaveat: false  // 📱 Düşük performansta bile çalış!
         });
         
         // 📱 AKILLI PIXEL RATIO - Performans + Netlik dengesi!
-        const pixelRatio = isMobile && !isTablet ? 
-            1.0 :  // 📱 TÜM TELEFONLAR: 1.0 (iPhone 15 dahil!)
-            (isTablet ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2.0));
+        const pixelRatio = isPhone ? 
+            0.5 :  // 📱 TELEFON: 0.5 (EXTREME OPTİMİZASYON - %75 daha az piksel!)
+            (isTablet ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.5));
         
-        console.log('🎨 Pixel Ratio:', pixelRatio);
+        console.log('🎨 Pixel Ratio:', pixelRatio, isPhone ? '📱 EXTREME PHONE MODE' : '');
         renderer.setPixelRatio(pixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         
@@ -983,13 +985,14 @@
         
         // 📱 ULTRA GÜÇLÜ MOBİL OPTİMİZASYON - ÇÖKME YOK!
         // Texture limit: ÇOK DÜŞÜK - Kesinlikle çökmemeli!
-        const MAX_LOADED_TEXTURES = isMobile && !isTablet ?
-            (deviceMemory <= 3 ? 2 : (screenSize <= 800 ? 3 : 4)) :  // 📱 2-4 texture (ULTRA SAFE!)
-            (isTablet ? 6 : 20);  // iPad: 6 (daha safe!), Desktop: 20
+        // 📱 ULTRA EXTREME MOBİL OPTİMİZASYON - ÇÖKME İMKANSIZ!
+        const MAX_LOADED_TEXTURES = isPhone ? 
+            1 :  // 📱 TELEFON: SADECE 1 TEXTURE (Mevcut skybox!)
+            (isTablet ? 4 : 15);  // 💻 Tablet: 4, 🖥️ Desktop: 15
         
-        const PRELOAD_DISTANCE = isMobile ? 2 : 3;
+        const PRELOAD_DISTANCE = isPhone ? 0 : (isTablet ? 1 : 2);  // 📱 Telefonda preload YOK!
         
-        console.log('💾 Max Textures:', MAX_LOADED_TEXTURES);
+        console.log('💾 Max Textures:', MAX_LOADED_TEXTURES, '| Preload:', PRELOAD_DISTANCE);
         
         function loadFluidTextures() {
             
@@ -3545,8 +3548,8 @@
         // 📱 HAFIZA İZLEME VE TEMİZLİK SİSTEMİ
         let lastMemoryCheck = Date.now();
         function checkMemory() {
-            // 📱 TELEFON: Her 2 saniye, diğerleri normal
-            const checkInterval = isPhone ? 2000 : (isMobile ? 3000 : 5000);
+            // 📱 TELEFON: Her 1 saniye, diğerleri normal
+            const checkInterval = isPhone ? 1000 : (isMobile ? 3000 : 5000);
             if (Date.now() - lastMemoryCheck > checkInterval) {
                 lastMemoryCheck = Date.now();
                 
@@ -3555,13 +3558,10 @@
                     renderer.info.reset();
                 }
                 
-                // 📱 TELEFON: SÜPER AGRESIF TEMİZLİK!
+                // 📱 TELEFON: ULTRA AGRESIF TEMİZLİK!
                 if (isPhone) {
-                    // SADECE mevcut ve sıradaki texture'ı tut, DİĞER HER ŞEYİ SİL!
-                    const toKeep = new Set([
-                        'u' + currentUniverseIndex,
-                        'u' + nextUniverseIndex
-                    ]);
+                    // SADECE mevcut texture'ı tut! (Sıradakini bile tutma!)
+                    const toKeep = new Set(['u' + currentUniverseIndex]);
                     
                     activeTextureIndices.forEach(key => {
                         if (!toKeep.has(key)) {
@@ -3688,17 +3688,19 @@
             if (isPhone) {
                 const now = performance.now();
                 const elapsed = now - lastFrameTime;
-                const frameInterval = 1000 / 30;  // 30 FPS
+                const frameInterval = 1000 / 20;  // 📱 20 FPS (Batarya + performans!)
                 
                 if (elapsed < frameInterval) {
                     return;  // Frame'i atla
                 }
                 lastFrameTime = now - (elapsed % frameInterval);
                 
-                // 📱 AGGRESSIVE CLEANUP - Her 10 saniyede!
+                // 📱 SUPER AGGRESSIVE CLEANUP - Her 5 saniyede!
                 mobileCleanupCounter++;
-                if (mobileCleanupCounter % 300 === 0) {  // 300 frame @ 30fps = 10 saniye
+                if (mobileCleanupCounter % 100 === 0) {  // 100 frame @ 20fps = 5 saniye
+                    console.log('🧹 Mobile cleanup! Frame:', frameCounter);
                     renderer.renderLists.dispose();
+                    renderer.info.reset();
                     if (window.gc) window.gc();
                     mobileCleanupCounter = 0;
                 }
@@ -3706,8 +3708,8 @@
             
             frameCounter++;
             
-            // 📱 Hafıza kontrolü frekansı - TELEFONDA DAHA SIK!
-            const memoryCheckFreq = isPhone ? 60 : (isTablet ? 240 : 300);  // Phone: 2s@30fps, Tablet: 4s, Desktop: 5s
+            // 📱 EXTREME HAFIZA KONTROLÜ - TELEFONDA HER SANİYE!
+            const memoryCheckFreq = isPhone ? 20 : (isTablet ? 240 : 300);  // Phone: 1s@20fps!, Tablet: 4s, Desktop: 5s
             if (frameCounter % memoryCheckFreq === 0) {
                 checkMemory();
             }
