@@ -420,25 +420,25 @@
         }
         // ============ 🌧️ KATMANLI YAĞMUR SİSTEMİ SONU ============
         
-        // 📱 EXTREME MOBİL RENDERER - ÇÖKME İMKANSIZ!
+        // 📱 OPTİMİZE MOBİL RENDERER - Görüntü kalitesi korunuyor!
         const renderer = new THREE.WebGLRenderer({ 
-            antialias: false,  // 📱 TELEFONDA ANTIALIAS KAPALI!
-            powerPreference: isPhone ? "low-power" : "high-performance",  // 📱 Düşük güç modu!
-            precision: isPhone ? "lowp" : (isTablet ? "mediump" : "highp"),  // 📱 En düşük kalite!
+            antialias: false,  // 📱 TELEFONDA ANTIALIAS KAPALI (performans için!)
+            powerPreference: isPhone ? "default" : "high-performance",  // 📱 Varsayılan güç modu
+            precision: isPhone ? "mediump" : (isTablet ? "mediump" : "highp"),  // 📱 Orta kalite!
             stencil: false,
             depth: true,
             alpha: false,
             logarithmicDepthBuffer: false,
-            preserveDrawingBuffer: false,  // 📱 Memory save!
-            failIfMajorPerformanceCaveat: false  // 📱 Düşük performansta bile çalış!
+            preserveDrawingBuffer: false,
+            failIfMajorPerformanceCaveat: false
         });
         
         // 📱 AKILLI PIXEL RATIO - Performans + Netlik dengesi!
         const pixelRatio = isPhone ? 
-            0.5 :  // 📱 TELEFON: 0.5 (EXTREME OPTİMİZASYON - %75 daha az piksel!)
+            0.85 :  // 📱 TELEFON: 0.85 (İyi görüntü + performans dengesi!)
             (isTablet ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.5));
         
-        console.log('🎨 Pixel Ratio:', pixelRatio, isPhone ? '📱 EXTREME PHONE MODE' : '');
+        console.log('🎨 Pixel Ratio:', pixelRatio, isPhone ? '📱 OPTIMIZED PHONE MODE' : '');
         renderer.setPixelRatio(pixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         
@@ -480,8 +480,8 @@
         
         // 🚗 MIRROR - ORİJİNAL AYARLAR + YAZI KALİTESİ ARTIRILDI!
         const mirrorRes = isPhone ? 
-            (screenSize <= 800 ? 256 : 384) :  // 📱 Orijinal değerler!
-            (isTablet ? 512 : 1024);  // Desktop biraz daha yüksek kalite için
+            512 :  // 📱 TELEFON: 512 (Yazılar okunsun!)
+            (isTablet ? 512 : 1024);
         
         console.log('🪞 Mirror Resolution:', mirrorRes);
         
@@ -1064,7 +1064,7 @@
                     texture.wrapT = THREE.ClampToEdgeWrapping;
                     texture.minFilter = THREE.LinearMipmapLinearFilter;
                     texture.magFilter = THREE.LinearFilter;
-                    texture.anisotropy = isMobile ? 4 : 8;  // 2→4 (daha keskin!)
+                    texture.anisotropy = isPhone ? 2 : (isMobile ? 4 : 8);  // Telefon: 2, Tablet: 4, Desktop: 8
                     texture.generateMipmaps = true;
                     
                     universeTextures[index] = texture;
@@ -1126,7 +1126,7 @@
                     texture.wrapT = THREE.MirroredRepeatWrapping;
                     texture.minFilter = THREE.LinearMipmapLinearFilter;
                     texture.magFilter = THREE.LinearFilter;
-                    texture.anisotropy = isMobile ? 4 : 8;
+                    texture.anisotropy = isPhone ? 2 : (isMobile ? 4 : 8);
                     texture.generateMipmaps = true;
                     
                     pourTextures[index] = texture;
@@ -1212,7 +1212,7 @@
                 texture.wrapT = THREE.MirroredRepeatWrapping;
                 texture.minFilter = THREE.LinearMipmapLinearFilter;
                 texture.magFilter = THREE.LinearFilter;
-                texture.anisotropy = isMobile ? 4 : 8;
+                texture.anisotropy = isPhone ? 2 : (isMobile ? 4 : 8);
                 texture.generateMipmaps = true;
                 
                 universeTextures[index] = texture;
@@ -1270,7 +1270,7 @@
                     texture.wrapT = THREE.MirroredRepeatWrapping;
                     texture.minFilter = THREE.LinearMipmapLinearFilter;
                     texture.magFilter = THREE.LinearFilter;
-                    texture.anisotropy = isMobile ? 4 : renderer.capabilities.getMaxAnisotropy();
+                    texture.anisotropy = isPhone ? 2 : (isMobile ? 4 : renderer.capabilities.getMaxAnisotropy());
                     texture.generateMipmaps = true;
                     
                     universeTextures[index] = texture;
@@ -1311,7 +1311,7 @@
                     texture.wrapT = THREE.MirroredRepeatWrapping;
                     texture.minFilter = THREE.LinearMipmapLinearFilter;
                     texture.magFilter = THREE.LinearFilter;
-                    texture.anisotropy = isMobile ? 4 : renderer.capabilities.getMaxAnisotropy();
+                    texture.anisotropy = isPhone ? 2 : (isMobile ? 4 : renderer.capabilities.getMaxAnisotropy());
                     texture.generateMipmaps = true;
                     
                     pourTextures[index] = texture;
@@ -1699,8 +1699,19 @@
             }
         }
         
+        // 📱 TELEFON: Skybox güncelleme frekansı sayacı
+        let skyboxUpdateCounter = 0;
+        
         function updateFluidSkybox() {
             if (!fluidMaterial) return;
+            
+            // 📱 TELEFON: Her 2 frame'de bir güncelle (performans!)
+            if (isPhone) {
+                skyboxUpdateCounter++;
+                if (skyboxUpdateCounter % 2 !== 0) {
+                    return;  // Bu frame'i atla
+                }
+            }
             
             const currentTime = Date.now();
             const cycleTime = (currentTime - cycleStartTime) % CYCLE_DURATION;
@@ -3688,7 +3699,7 @@
             if (isPhone) {
                 const now = performance.now();
                 const elapsed = now - lastFrameTime;
-                const frameInterval = 1000 / 20;  // 📱 20 FPS (Batarya + performans!)
+                const frameInterval = 1000 / 25;  // 📱 25 FPS (Daha akıcı!)
                 
                 if (elapsed < frameInterval) {
                     return;  // Frame'i atla
@@ -3697,7 +3708,7 @@
                 
                 // 📱 SUPER AGGRESSIVE CLEANUP - Her 5 saniyede!
                 mobileCleanupCounter++;
-                if (mobileCleanupCounter % 100 === 0) {  // 100 frame @ 20fps = 5 saniye
+                if (mobileCleanupCounter % 125 === 0) {  // 125 frame @ 25fps = 5 saniye
                     console.log('🧹 Mobile cleanup! Frame:', frameCounter);
                     renderer.renderLists.dispose();
                     renderer.info.reset();
@@ -3709,7 +3720,7 @@
             frameCounter++;
             
             // 📱 EXTREME HAFIZA KONTROLÜ - TELEFONDA HER SANİYE!
-            const memoryCheckFreq = isPhone ? 20 : (isTablet ? 240 : 300);  // Phone: 1s@20fps!, Tablet: 4s, Desktop: 5s
+            const memoryCheckFreq = isPhone ? 25 : (isTablet ? 240 : 300);  // Phone: 1s@25fps!, Tablet: 4s, Desktop: 5s
             if (frameCounter % memoryCheckFreq === 0) {
                 checkMemory();
             }
@@ -3736,7 +3747,7 @@
             });
             
             // 🪞 Mirror update - ORİJİNAL AYARLAR!
-            const mirrorUpdateFreq = isTablet ? 6 : (isLowEnd ? 12 : 9);
+            const mirrorUpdateFreq = isPhone ? 10 : (isTablet ? 6 : 9);  // 📱 Phone: 10 frame'de bir (daha sık!)
             
             if (car && mirrorMeshes.length > 0 && frameCounter % mirrorUpdateFreq === 0) {
                 mirrorMeshes.forEach(mesh => mesh.visible = false);
