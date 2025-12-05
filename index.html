@@ -480,10 +480,10 @@
         
         // 🚗 MIRROR - ORİJİNAL AYARLAR + YAZI KALİTESİ ARTIRILDI!
         const mirrorRes = isPhone ? 
-            512 :  // 📱 TELEFON: 512 (Yazılar okunsun!)
-            (isTablet ? 512 : 1024);
+            1024 :  // 📱 TELEFON: 1024 (ÇOK YÜKSEK! Yazılar mükemmel!)
+            (isTablet ? 1024 : 1024);
         
-        console.log('🪞 Mirror Resolution:', mirrorRes);
+        console.log('🪞 Mirror Resolution:', mirrorRes, '(ULTRA HIGH!)');
         
         const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(mirrorRes, {
             format: THREE.RGBAFormat,
@@ -1906,7 +1906,7 @@
         let turnSpeed = 0;
         let maxTurnSpeed = 0.02;
         
-        let cameraMode = 0;
+        let cameraMode = isPhone ? 1 : 0;  // 📱 Telefon: Sadece copilot (mod 1)!
         
         const DEFAULT_CAMERA_SETTINGS = {
             mode0: {
@@ -3140,11 +3140,11 @@
                 originalUpdateCar();
             };
             
-            // 📷 CAMERA MODE BUTTON
+            // 📷 CAMERA MODE BUTTON - TELEFONDA DEVİRE DIŞI!
             const cameraBtn = document.getElementById('cameraBtn');
             const cameraIcons = ['📷', '👁️', '🎥'];
             
-            if (cameraBtn) {
+            if (cameraBtn && !isPhone) {  // 📱 Telefonda kamera değiştirme YOK!
                 const cameraBtnHandler = (e) => {
                     e.preventDefault();
                     cameraMode = (cameraMode + 1) % 3;
