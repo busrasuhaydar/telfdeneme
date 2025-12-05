@@ -248,7 +248,7 @@
             const layerConfigs = [
                 {
                     name: 'EXTREME_CLOSE',
-                    count: isPhone ? 60 : (isTablet ? 120 : 180),  // 📱 80→60 (optimize!)
+                    count: isPhone ? 40 : (isTablet ? 100 : 180),  // 📱 60→40 (SÜPER OPTİMİZE!)
                     minDist: 2,      // Kameraya 2-8 birim mesafe (ÇOK YAKIN!)
                     maxDist: 8,
                     minLength: 2.5,  // Çok uzun damlalar
@@ -259,7 +259,7 @@
                 },
                 {
                     name: 'CLOSE',
-                    count: isPhone ? 120 : (isTablet ? 250 : 400),  // 📱 150→120 (optimize!)
+                    count: isPhone ? 80 : (isTablet ? 200 : 400),  // 📱 120→80 (SÜPER OPTİMİZE!)
                     minDist: 8,      // 8-25 birim
                     maxDist: 25,
                     minLength: 1.5,
@@ -270,7 +270,7 @@
                 },
                 {
                     name: 'MEDIUM',
-                    count: isPhone ? 150 : (isTablet ? 350 : 600),  // 📱 200→150 (optimize!)
+                    count: isPhone ? 100 : (isTablet ? 300 : 600),  // 📱 150→100 (SÜPER OPTİMİZE!)
                     minDist: 25,     // 25-80 birim
                     maxDist: 80,
                     minLength: 1.0,
@@ -281,7 +281,7 @@
                 },
                 {
                     name: 'FAR',
-                    count: isPhone ? 100 : (isTablet ? 250 : 400),  // 📱 150→100 (optimize!)
+                    count: isPhone ? 60 : (isTablet ? 200 : 400),  // 📱 100→60 (SÜPER OPTİMİZE!)
                     minDist: 80,     // 80-150 birim (uzak)
                     maxDist: 150,
                     minLength: 0.5,
@@ -421,21 +421,23 @@
         
         // 📱 PROFESYONEL MOBİL RENDERER - ULTRA OPTİMİZE!
         const renderer = new THREE.WebGLRenderer({ 
-            antialias: isTablet,  // 📱 Tablet'te antialias AÇIK!
+            antialias: isTablet,  // 📱 Tablet'te antialias AÇIK, telefonda KAPALI!
             powerPreference: "high-performance",
-            precision: isTablet ? "highp" : (isMobile ? "mediump" : "highp"),
+            precision: isPhone ? "mediump" : (isTablet ? "highp" : "highp"),  // 📱 Telefon: mediump!
             stencil: false,
             depth: true,
             alpha: false,
-            logarithmicDepthBuffer: false
+            logarithmicDepthBuffer: false,
+            preserveDrawingBuffer: false,  // 📱 Mobil optimizasyon!
+            failIfMajorPerformanceCaveat: false  // 📱 Düşük performansta bile çalış!
         });
         
         // 📱 AKILLI PIXEL RATIO - Performans + Netlik dengesi!
-        const pixelRatio = isMobile && !isTablet ? 
-            1.0 :  // 📱 TÜM TELEFONLAR: 1.0 (iPhone 15 dahil!)
-            (isTablet ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2.0));
+        const pixelRatio = isPhone ? 
+            0.75 :  // 📱 TELEFON: 0.75 (MAKSIMUM OPTİMİZASYON - Çözünürlük görsel olarak korunur!)
+            (isTablet ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.5));
         
-        console.log('🎨 Pixel Ratio:', pixelRatio);
+        console.log('🎨 Pixel Ratio:', pixelRatio, isPhone ? '📱 PHONE MODE' : (isTablet ? '💻 TABLET MODE' : '🖥️ DESKTOP MODE'));
         renderer.setPixelRatio(pixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         
@@ -935,9 +937,7 @@
                     // 🔟 Son aşamada tam yeni görsele geç
                     originalColor.rgb = mix(originalColor.rgb, nextColor.rgb, revealMask);
                     
-                    // 1️⃣1️⃣ EDGE GLOW - Geçiş sınırlarında hafif parıltı!
-                    float edgeGlow = smoothstep(0.35, 0.5, revealMask) * (1.0 - smoothstep(0.5, 0.65, revealMask));
-                    originalColor.rgb += vec3(edgeGlow * 0.08);  // Hafif glow - ana karışım net kalsın!
+                    // ✅ Edge glow KALDIRILDI - Gri ışık hüzmesi yok!
                 }
                 
                 vec3 finalColor = applyColorTemp(originalColor.rgb, uColorTemp);
@@ -976,13 +976,13 @@
         
         // 📱 ULTRA GÜÇLÜ MOBİL OPTİMİZASYON - ÇÖKME YOK!
         // Texture limit: ÇOK DÜŞÜK - Kesinlikle çökmemeli!
-        const MAX_LOADED_TEXTURES = isMobile && !isTablet ?
-            (deviceMemory <= 3 ? 2 : (screenSize <= 800 ? 3 : 4)) :  // 📱 2-4 texture (ULTRA SAFE!)
-            (isTablet ? 6 : 20);  // iPad: 6 (daha safe!), Desktop: 20
+        const MAX_LOADED_TEXTURES = isPhone ?
+            1 :  // 📱 TELEFON: SADECE 1 TEXTURE (Mevcut + preload yok!) - MAXIMUM SAFE!
+            (isTablet ? 4 : 15);  // 💻 Tablet: 4, 🖥️ Desktop: 15
         
-        const PRELOAD_DISTANCE = isMobile ? 2 : 3;
+        const PRELOAD_DISTANCE = isPhone ? 0 : (isTablet ? 1 : 2);  // 📱 Telefonda preload YOK!
         
-        console.log('💾 Max Textures:', MAX_LOADED_TEXTURES);
+        console.log('💾 Max Textures:', MAX_LOADED_TEXTURES, '| Preload Distance:', PRELOAD_DISTANCE);
         
         function loadFluidTextures() {
             
@@ -3649,12 +3649,46 @@
         let frameCounter = 0;
         let animationId = null;  // ✅ Track animation loop!
         
+        // 📱 MOBİL FPS LİMİTER - Batarya ve performans için!
+        let lastFrameTime = 0;
+        const targetFPS = isPhone ? 30 : 60;  // 📱 Telefonda 30 FPS yeterli!
+        const frameInterval = 1000 / targetFPS;
+        
+        // 📱 MOBİL MEMORY CLEANUP SAYACI
+        let memoryCleanupCounter = 0;
+        
         function animate() {
             animationId = requestAnimationFrame(animate);
+            
+            // 📱 FPS LİMİTER - Telefonda 30 FPS'e sınırla!
+            if (isPhone) {
+                const now = performance.now();
+                const elapsed = now - lastFrameTime;
+                
+                if (elapsed < frameInterval) {
+                    return;  // Bu frame'i atla, henüz zaman dolmadı!
+                }
+                
+                lastFrameTime = now - (elapsed % frameInterval);
+            }
+            
             frameCounter++;
+            memoryCleanupCounter++;
+            
+            // 📱 AGGRESSIVE MEMORY CLEANUP - Telefonda çok daha sık!
+            if (isPhone && memoryCleanupCounter % 600 === 0) {  // Her 20 saniyede (30fps × 20s = 600 frame)
+                console.log('🧹 Mobil aggressive cleanup başlıyor...');
+                if (renderer.info.memory.geometries > 50) {
+                    renderer.renderLists.dispose();
+                }
+                // Garbage collection'ı tetikle
+                if (window.gc) {
+                    window.gc();
+                }
+            }
             
             // 📱 Hafıza kontrolü frekansı - cihaza göre!
-            const memoryCheckFreq = isTablet ? 240 : (isMobile ? 180 : 300);  // iPad: 4s, Phone: 3s, Desktop: 5s
+            const memoryCheckFreq = isPhone ? 120 : (isTablet ? 240 : 300);  // Phone: 4s@30fps, Tablet: 4s, Desktop: 5s
             if (frameCounter % memoryCheckFreq === 0) {
                 checkMemory();
             }
